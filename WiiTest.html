@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible">
+  <title>WII test</title>
+  <style>
+    html {
+    //  overflow: hidden;
+    }
+    #myP{
+      position: absolute;
+      right: 30px;
+      top: 0;
+    }
+    #myP2{
+      position: absolute;
+      right: 30px;
+      top: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <p id="myP" >test</p>
+  <p id="myP2" >button</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/103/three.min.js"></script>
+  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript">
+    var frame, scene, camera, renderer, light, controls;
+    var stats, circle1, circle2, circle3, circle4;
+
+    init();
+    animate();
+
+    $(function() {
+      var socket = io();
+      socket.on('ir', function(ir) {
+        text = 'irx = ' + ir.x + '<br>' + 'iry = ' + ir.y;
+        $('#myP').html(text);
+        /*circle1.position.set(ir.x[0]-512, ir.y[0], 0);
+        circle2.position.set(ir.x[1]-512, ir.y[1], 0);
+        circle3.position.set(ir.x[2]-512, ir.y[2], 0);
+        circle4.position.set(ir.x[3]-512, ir.y[3], 0);*/
+        let x = ir.x[0]-512;
+        let y = ir.y[0]-384;
+        circle1.position.set( -x, -y, 0);
+      });
+      socket.on('a', function(button){
+        $('#myP2').text('buttonA is pressed' );
+      });
+    });
+
+    function init() {
+
+      renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x888888);
+      document.body.appendChild(renderer.domElement);
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.z = 800;
+
+      stats = new Stats();
+      stats.showPanel(0);
+      stats.domElement.style.position = 'absolute';
+      stats.domElement.style.left = '0px';
+      stats.domElement.style.top = '0px';
+      document.body.appendChild(stats.domElement);
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+
+      light = new THREE.DirectionalLight(0xffffff);
+      light.position.set(50, 100, 0);
+      scene.add(light);
+
+      /*var geometry = new THREE.CircleGeometry( 10, 32 );
+      var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+      circle1 = new THREE.Mesh( geometry, material );
+      circle2 = circle1.clone();
+      circle3 = circle1.clone();
+      circle4 = circle1.clone();
+      scene.add( circle1 );
+      scene.add( circle2 );
+      scene.add( circle3 );
+      scene.add( circle4 );*/
+      var geometry = new THREE.CircleGeometry( 20, 32 );
+      var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+      circle1 = new THREE.Mesh( geometry, material );
+      scene.add( circle1 );
+      /////
+      window.addEventListener('resize', onWindowResize, false);
+
+    }
+
+    function animate() {
+      stats.begin();
+      stats.end();
+      requestAnimationFrame(animate);
+      render();
+    }
+
+    function render() {
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+  </script>
+
+</body>
+
+</html>
